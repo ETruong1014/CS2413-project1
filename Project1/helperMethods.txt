@@ -1,0 +1,110 @@
+/********************************************************************
+This file contains some helper functions to solve Matrix-Matrix multiplication
+You may use one or both the functions to solve.
+********************************************************************/
+
+/**
+ * This method will help you fetch a column of values from the matrix
+ *
+ * Provided the column number as an argument,
+ * the method returns an array which contains the column values.
+ *
+ */
+int* CSR::getColumnVector(int col) {		//all rows of column col
+	int *colVector = new int[n];
+	int r;
+	for (int i = 0; i < n; i++)
+		colVector[i] = 0;
+
+	bool found;
+	int k, j;
+
+	k = 0;
+	for (int i = 0; i < n - 1; i++) {
+		r = rowPtr[i + 1] - rowPtr[i];
+		k = rowPtr[i];
+		found = false;
+		j = 0;
+		while ((j < r) && !found) {
+			if (colPos[k] == col) {
+				found = true;
+				colVector[i] = values[k];
+			}
+			k++;
+			j++;
+		}
+	}
+	int p = rowPtr[n - 1];
+	found = false;
+	while ((p < (nonZeros)) && (!found)) {
+		if (colPos[p] == col) {
+			colVector[n - 1] = values[p];
+			found = true;
+		} else
+			p++;
+	}
+	return colVector;
+}
+
+/**
+ * This method will help you fetch a row of values from the matrix
+ *
+ * Provided the row number as an argument,
+ * the method returns an array which contains the row values.
+ *
+ */
+
+int* CSR::getRowVec(int row) {
+
+	int *vector = new int[n];
+	for (int i = 0; i < n; i++)
+		vector[i] = 0;
+
+	if (row < n - 1) {
+
+		for (int i = rowPtr[row]; i < rowPtr[row + 1]; i++) {
+			for (int j = 0; j < m; j++) {
+				if (colPos[i] == j)
+					vector[j] = values[i];
+			}
+		}
+	} else {
+		for (int i = rowPtr[row]; i < nonZeros; i++) {
+			for (int j = 0; j < m; j++) {
+				if (colPos[i] == j)
+					vector[j] = values[i];
+			}
+		}
+	}
+	return vector;
+}
+
+
+/********************************************************************
+An error in Matrix-Vector multiplication, please use the following code
+********************************************************************/
+
+int* CSR::matrixVectorMultiply(int *inputVector) {
+
+	int *outputVector = new int[n];
+
+	for (int i = 0; i < n; i++)
+		outputVector[i] = 0;
+
+	int sum = 0;
+	int start, end;
+	for (int i = 0; i < n; i++) {
+		sum = 0;
+		start = rowPtr[i];
+		if ((i + 1) == n)
+			end = nonZeros;
+		else
+			end = rowPtr[i + 1];
+
+		for (int j = start; j < end; j++) {
+			sum = sum + (values[j] * inputVector[colPos[j]]);
+		}
+		outputVector[i] = sum;
+	}
+	return outputVector;
+} 
