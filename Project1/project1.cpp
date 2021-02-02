@@ -50,9 +50,18 @@ CSR::CSR(CSR& matrixB) {
 	n = matrixB.n;
 	m = matrixB.m;
 	nonZeros = matrixB.nonZeros;
-	values = matrixB.values;
-	colPos = matrixB.colPos;
-	rowPtr = matrixB.rowPtr;
+	values = new int[nonZeros];
+	for (int i = 0; i < nonZeros; i++) {
+		values[i] = matrixB.values[i];
+	}
+	colPos = new int[nonZeros];
+	for (int i = 0; i < nonZeros; i++) {
+		colPos[i] = matrixB.colPos[i];
+	}
+	rowPtr = new int[n];
+	for (int i = 0; i < n; i++) {
+		rowPtr[i] = matrixB.rowPtr[i];
+	}
 }
 
 CSR::CSR(int rows, int cols, int numNonZeros) {
@@ -89,17 +98,16 @@ void CSR::addRow(int row) {
 }
 
 void CSR::display() {
-	int currentVal = 0; //current value in values array
+	int* rowVector = new int[n]; //row as a vector
+
+	if (rowPtr[n - 1] == 0) { //last row is empty
+		rowPtr[n - 1] = nonZeros;
+	}
 
 	for (int i = 0; i < n; i++) { //current row to print
-		for (int j = 0; j < m; j++) { //current column of row
-			if (colPos[currentVal] == j) {
-				cout << values[currentVal] << " ";
-				currentVal++;
-			}
-			else {
-				cout << 0 << " ";
-			}
+		rowVector = getRowVec(i);
+		for (int j = 0; j < m; j++) {
+			cout << rowVector[j] << " ";
 		}
 		cout << endl;
 	}
@@ -164,7 +172,7 @@ CSR* CSR::matrixMultiply(CSR& matrixB) {
 		for (int j = 0; j < matrixB.m; j++) { //current column of matrixB
 			valsInCol = matrixB.getColumnVector(j);
 			for (int k = 0; k < n; k++) { //multiplying vectors
-				tempMultVals[currentVal] = tempMultVals[currentVal] + valsInRow[k] * valsInCol[k];
+				tempMultVals[currentVal] = tempMultVals[currentVal] + (valsInRow[k] * valsInCol[k]);
 			}
 			tempMultCols[currentVal] = j;
 			if (tempMultVals[currentVal] > 0) { //non-zero value
@@ -180,7 +188,7 @@ CSR* CSR::matrixMultiply(CSR& matrixB) {
 
 	outputMatrix = new CSR(n, matrixB.m, nonZeroCount);
 
-	for (int i = 0; i < nonZeroCount; i++) { //copy values from tempMultVals and tempMultCols to output values and colPos
+	for (int i = 0; i < currentVal; i++) { //copy values from tempMultVals and tempMultCols to output values and colPos
 		if (tempMultVals[i] > 0) {
 			(*outputMatrix).addValue(tempMultVals[i]);
 			(*outputMatrix).addColumn(tempMultCols[i]);
@@ -261,7 +269,6 @@ CSR::~CSR() {
 	if (values != NULL) delete [] values;
 	if (rowPtr != NULL) delete [] rowPtr;
 	if (colPos != NULL) delete [] colPos;
-	cout << "CSR Object Destroyed!!" << endl;
 	n = 0;
 	m = 0;
 	nonZeros = 0;
