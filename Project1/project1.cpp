@@ -293,7 +293,7 @@ int main() {
 	for (int i = 0; i < numNonZeros; i++) {
 		cin >> row >> col >> value;
 		(*A).addValue(value);
-		(*A).addRow(row); //needs to be done cleverly in the method
+		(*A).addRow(row);
 		(*A).addColumn(col);
 	}
 	cout << "Matrix A : " << endl;
@@ -303,7 +303,6 @@ int main() {
 	cout << "Copied Matrix C: " << endl;
 	(*C).display();
 
-	//read in second matrix into B and write code for (*B).display();
 	cin >> numRows >> numColumns;
 	cin >> numNonZeros;
 
