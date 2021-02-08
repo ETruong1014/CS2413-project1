@@ -20,7 +20,7 @@ class CSR {
 		int* colPos; //Array that contains the column number from the original matrix for the non-zero values
 		int valIdx = 0; //next available index of values
 		int colIdx = 0; //next available index of colPos
-		int rowIdx = 0; //next available index of rowPtr
+		int rowIdx = 0; //current index of rowPtr
 	public:
 		CSR();
 		CSR(CSR& matrixB); //copy constructor
@@ -92,6 +92,11 @@ void CSR::addRow(int row) {
 		rowPtr[0] = 0;
 	}
 	else if (rowIdx != row) {
+		if ((rowIdx + 1) != row) { //skipped rows during input
+			for (int i = rowIdx + 1; i < row; i++) {
+				rowPtr[i] = valIdx - 2; //second-most recent value
+			}
+		}
 		rowIdx = row;
 		rowPtr[rowIdx] = valIdx - 1;
 	}
@@ -100,8 +105,10 @@ void CSR::addRow(int row) {
 void CSR::display() {
 	int* rowVector = new int[n]; //row as a vector
 
-	if (rowPtr[n - 1] == 0) { //last row is empty
-		rowPtr[n - 1] = nonZeros;
+	for (int i = 1; i < n; i++) { //if there are consecutive empty rows until the end
+		if (rowPtr[i] == 0) {
+			rowPtr[i] = nonZeros;
+		}
 	}
 
 	for (int i = 0; i < n; i++) { //current row to print
